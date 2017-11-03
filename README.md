@@ -1,2 +1,1 @@
-# Trade Validation
-## Developed by Touraj Ebrahimi
+# Trade Validation trial
