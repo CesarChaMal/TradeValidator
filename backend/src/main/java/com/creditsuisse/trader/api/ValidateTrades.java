@@ -22,7 +22,7 @@ public class ValidateTrades {
     @RequestMapping(
             value = "/api/validatetrades",
             method = RequestMethod.POST,
-            consumes = "text/plain")
+            consumes = "application/json")
     public String validatetrades(@RequestBody String tradeJSON) throws Exception {
 
         System.out.println("In validatetrades method...");
