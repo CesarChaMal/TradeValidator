@@ -96,17 +96,3 @@ task buildDocker(type: Docker) {
 }
 
 buildDocker.dependsOn(build)
-
-task buildDocker(type: Docker) {
-  baseImage = 'develar/java:latest'
-  push = false
-  tag = 'cesarchamal/trader-validator'
-  addFile {
-    from jar
-    rename {'app.jar'}
-  }
-  entryPoint(['java', '-Djava.security.egd=file:/dev/./urandom', '-jar', '/app.jar'])
-  exposePort(8080)
-}
-
-buildDocker.dependsOn(build)
