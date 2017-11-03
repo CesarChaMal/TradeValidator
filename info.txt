@@ -1,0 +1,69 @@
+-- install gradle wrapper
+gradle wrapper --gradle-version 4.2 --debug --stacktrace
+gradle wrapper
+
+-- build front
+./gradlew frontend:yarn_install
+gradlew frontend:yarn_install
+
+-- run front
+./gradlew frontend:start
+gradlew frontend:start
+
+-- run app
+./gradlew bootRun
+gradlew bootRun
+
+-- tests
+./gradlew check
+gradlew check
+
+-- test front
+./gradlew backend/frontend:test
+gradlew backend/frontend:test
+
+-- create docker img
+./gradlew backend:buildDocker
+gradlew backend:buildDocker
+
+-- run docker
+docker run -p 8080:8080 geowarin/boot-react
+docker run -p 8080:8080 cesarchamal/springboot-react
+docker run -p 8080:8080 cesarchamal/trader-validator
+
+-- run docker with parameters
+docker run -p 8080:8080 geowarin/boot-react --spring.profiles.active=redis --spring.redis.host=redis
+docker run -p 8080:8080 cesarchamal/springboot-react --spring.profiles.active=redis --spring.redis.host=redis
+docker run -p 8080:8080 cesarchamal/trader-validator --spring.profiles.active=redis --spring.redis.host=redis
+
+-- run docker together with a redis server.
+docker-compose up -d
+
+Get the list of all containers
+docker ps -a
+
+Get the list of all Images
+docker images
+
+Identify the image id of the image you want to delete, for example:
+REPOSITORY     TAG     IMAGE ID        CREATED        VIRTUAL SIZE
+kweku360/java  latest  08d3a9b8e166    2 weeks ago         5.733 GB`
+Finally remove Image using image id (only the first three digits are required)
+docker rmi 08d
+
+Remove single image
+docker rmi image_name:version/image-id
+
+Remove all images
+docker rmi $(docker images -qf "dangling=true")
+
+Kill containers and remove them:
+docker rm $(docker kill $(docker ps -aq))
+Note: Replace kill with stop for graceful shutdown
+
+Remove all images except "my-image"
+Use grep to remove all except my-image and ubuntu
+
+docker rmi $(docker images | grep -v 'ubuntu\|my-image' | awk {'print $3'})
+Or (without awk)
+docker rmi $(docker images --quiet | grep -v $(docker images --quiet ubuntu:my-image))
