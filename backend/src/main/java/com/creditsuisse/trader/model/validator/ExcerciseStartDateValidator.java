@@ -1,5 +1,6 @@
-package com.creditsuisse.trader.validator;
+package com.creditsuisse.trader.model.validator;
 
+import com.creditsuisse.trader.model.validator.IValidator;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -9,12 +10,12 @@ import com.creditsuisse.trader.util.Utility;
 /**
  * Created by Cesar Chavez.
  */
-public class ExpiryAndPrimiumDateValidator implements IValidator {
+public class ExcerciseStartDateValidator implements IValidator {
 
     private String message = null;
     JSONArray validationMessages;
 
-    public ExpiryAndPrimiumDateValidator(JSONArray validationMessages) {
+    public ExcerciseStartDateValidator(JSONArray validationMessages) {
         this.validationMessages = validationMessages;
     }
 
@@ -23,34 +24,38 @@ public class ExpiryAndPrimiumDateValidator implements IValidator {
 
         boolean isValidationSuccessfull = true;
 
+//      Discard , Because only VanillaOption has style
         if (!jsonObj.get("type").equals("VanillaOption")) {
-//                [Touraj] :: Discard , Because only VanillaOption has Currency
             return true;
         }
 
-        String expiryDate = (String) jsonObj.get("expiryDate");
-        String premiumDate = (String) jsonObj.get("premiumDate");
-        String deliveryDate = (String) jsonObj.get("deliveryDate");
-
-        //[Touraj] expiryDate < deliveryDate AND premiumDate < deliveryDate
-        boolean res1 = Utility.checkBeforeDate(expiryDate, deliveryDate);
-        boolean res2 = Utility.checkBeforeDate(premiumDate, deliveryDate);
-
-        JSONObject jsonObjValidationMSG = new JSONObject();
-
-        if (!res1 || !res2) {
-            isValidationSuccessfull = false;
-
-            jsonObjValidationMSG.put("ErrorType", "InvalidExpiryAndPrimiumDate");
-            jsonObjValidationMSG.put("TradeNumber", tradeNumber);
-
-            System.out.printf("InvalidExpiryAndPrimiumDate:%s \n", expiryDate + "::" + premiumDate);
+//      Discard , Because only AMERICAN Style has excerciseStartDate
+        if (!jsonObj.get("style").toString().equalsIgnoreCase("AMERICAN")) {
+            return true;
         }
 
+        String tradeDate = (String) jsonObj.get("tradeDate");
+        String expiryDate = (String) jsonObj.get("expiryDate");
+        String excerciseStartDate = (String) jsonObj.get("excerciseStartDate");
+
+//      tradeDate < excerciseStartDate < expiryDate
+        boolean res1 = Utility.checkBeforeDate(excerciseStartDate, tradeDate);
+        boolean res2 = Utility.checkBeforeDate(excerciseStartDate, expiryDate);
+
+        JSONObject jsonObjValidationMSG = new JSONObject();
+        if (res1 || !res2) {
+            isValidationSuccessfull = false;
+
+            jsonObjValidationMSG.put("ErrorType", "InvalidExcerciseStartDate");
+            jsonObjValidationMSG.put("TradeNumber", tradeNumber);
+
+            System.out.printf("ExcerciseStartDate:%s is not Valid\n", excerciseStartDate);
+        }
+
+//      Adding Validation Message to Validation Store
         if (!isValidationSuccessfull) {
             setMessage(jsonObjValidationMSG.toString());
         }
-        //[Touraj] :: Adding Validation Message to Validation Store
 
         if (!isValidationSuccessfull) {
             validationMessages.put(jsonObjValidationMSG);

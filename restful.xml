@@ -1,0 +1,38 @@
+<RestClientRequest>
+  <option name="biscuits">
+    <list />
+  </option>
+  <option name="httpMethod" value="POST" />
+  <option name="urlBase" value="http://localhost:3000" />
+  <option name="urlPath" value="/api/validatetrades" />
+  <option name="headers">
+    <list>
+      <KeyValuePair>
+        <option name="key" value="Accept" />
+        <option name="value" value="application/json" />
+      </KeyValuePair>
+      <KeyValuePair>
+        <option name="key" value="Cache-Control" />
+        <option name="value" value="no-cache" />
+      </KeyValuePair>
+      <KeyValuePair>
+        <option name="key" value="Authorization" />
+        <option name="value" value="Basic dXNlcjpwYXNzd29yZA==" />
+      </KeyValuePair>
+    </list>
+  </option>
+  <option name="parameters">
+    <list>
+      <KeyValuePair>
+        <option name="key" value="" />
+        <option name="value" value="" />
+      </KeyValuePair>
+    </list>
+  </option>
+  <option name="parametersEnabled" value="true" />
+  <option name="haveTextToSend" value="true" />
+  <option name="haveFileToSend" value="false" />
+  <option name="isFileUpload" value="false" />
+  <option name="textToSend" value="{&quot;customer&quot;:&quot;PLUTO1&quot;,&quot;ccyPair&quot;:&quot;EURUSD&quot;,&quot;type&quot;:&quot;Spot&quot;,&quot;direction&quot;:&quot;BUY&quot;,&quot;tradeDate&quot;:&quot;2016-08-11&quot;,&quot;amount1&quot;:1000000.00,&quot;amount2&quot;:1120000.00,&quot;rate&quot;:1.12,&quot;valueDate&quot;:&quot;2016-08-15&quot;,&quot;legalEntity&quot;:&quot;CS Zurich&quot;,&quot;trader&quot;:&quot;Johann Baumfiddler&quot;}" />
+  <option name="filesToSend" value="" />
+</RestClientRequest>

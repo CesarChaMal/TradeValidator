@@ -1,5 +1,6 @@
-package com.creditsuisse.trader.validator;
+package com.creditsuisse.trader.model.validator;
 
+import com.creditsuisse.trader.model.validator.IValidator;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -23,8 +24,8 @@ public class ISO4217Validator implements IValidator {
 
         boolean isValidationSuccessfull = true;
 
+//      Discard , Because only VanillaOption has Currency
         if (!jsonObj.get("type").equals("VanillaOption")) {
-//                [Touraj] :: Discard , Because only VanillaOption has Currency
             return true;
         }
 
@@ -60,11 +61,11 @@ public class ISO4217Validator implements IValidator {
             validationMessages.put(jsonObjValidationMSG2);
         }
 
+//      Adding Validation Message to Validation Store
         if (!isValidationSuccessfull) {
             setMessage(jsonObjValidationMSG1.toString() + "\n" + jsonObjValidationMSG2.toString());
 
         }
-        //[Touraj] :: Adding Validation Message to Validation Store
 
         return isValidationSuccessfull;
     }

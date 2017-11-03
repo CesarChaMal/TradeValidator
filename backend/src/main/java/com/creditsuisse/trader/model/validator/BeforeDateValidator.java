@@ -1,4 +1,4 @@
-package com.creditsuisse.trader.validator;
+package com.creditsuisse.trader.model.validator;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -9,12 +9,12 @@ import com.creditsuisse.trader.util.Utility;
 /**
  * Created by Cesar Chavez.
  */
-public class WeekendValidator implements IValidator {
+public class BeforeDateValidator implements IValidator {
 
     private String message = null;
     JSONArray validationMessages;
 
-    public WeekendValidator(JSONArray validationMessages) {
+    public BeforeDateValidator(JSONArray validationMessages) {
         this.validationMessages = validationMessages;
     }
 
@@ -24,29 +24,29 @@ public class WeekendValidator implements IValidator {
         boolean isValidationSuccessfull = true;
 
         if (!(jsonObj.get("type").equals("Spot") || jsonObj.get("type").equals("Forward"))) {
-//                [Touraj] :: Discard , Because only Spot and Forward types have valueDate
             return true;
         }
 
         String valueDate = (String) jsonObj.get("valueDate");
+        String tradeDate = (String) jsonObj.get("tradeDate");
 
-        boolean result = Utility.isDateFallinWeekend(valueDate);
+        boolean res = Utility.checkBeforeDate(valueDate, tradeDate);
 
         JSONObject jsonObjValidationMSG = new JSONObject();
-        if (result) {
+        if (res) {
             isValidationSuccessfull = false;
 
-            jsonObjValidationMSG.put("ErrorType", "valueDateFallinWeekend");
+            jsonObjValidationMSG.put("ErrorType", "valueDateNotbeforeTradeDate");
             jsonObjValidationMSG.put("TradeNumber", tradeNumber);
 
-            System.out.printf("valueDate:%s fall in Weekend\n", valueDate);
+            System.out.printf("valueDate:%s is Before tradeDate:%s\n", valueDate, tradeDate);
         }
 
+      //Adding Validation Message to Validation Store
         if (!isValidationSuccessfull) {
             setMessage(jsonObjValidationMSG.toString());
         }
 
-        //[Touraj] :: Adding Validation Message to Validation Store
         if (!isValidationSuccessfull) {
             validationMessages.put(jsonObjValidationMSG);
         }
@@ -63,6 +63,5 @@ public class WeekendValidator implements IValidator {
     public void setMessage(String message) {
 
         this.message = message;
-
     }
 }

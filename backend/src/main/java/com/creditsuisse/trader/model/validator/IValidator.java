@@ -1,4 +1,4 @@
-package com.creditsuisse.trader.validator;
+package com.creditsuisse.trader.model.validator;
 
 import org.json.JSONException;
 import org.json.JSONObject;

@@ -1,52 +1,55 @@
-package com.creditsuisse.trader.validator;
+package com.creditsuisse.trader.model.validator;
 
+import com.creditsuisse.trader.model.validator.IValidator;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import com.creditsuisse.trader.util.Utility;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by Cesar Chavez.
  */
-public class BeforeDateValidator implements IValidator {
+public class StyleValidator implements IValidator {
 
     private String message = null;
     JSONArray validationMessages;
 
-    public BeforeDateValidator(JSONArray validationMessages) {
+    public StyleValidator(JSONArray validationMessages) {
         this.validationMessages = validationMessages;
     }
 
     @Override
     public boolean processValidation(JSONObject jsonObj, int tradeNumber) throws JSONException {
 
+        List<String> validStylesList = Arrays.asList("AMERICAN", "EUROPEAN");
+
         boolean isValidationSuccessfull = true;
 
-        if (!(jsonObj.get("type").equals("Spot") || jsonObj.get("type").equals("Forward"))) {
-//                [Touraj] :: Discard , Because only Spot and Forward types have valueDate
+//      Discard , Because only VanillaOption has style
+        if (!jsonObj.get("type").equals("VanillaOption")) {
             return true;
         }
 
-        String valueDate = (String) jsonObj.get("valueDate");
-        String tradeDate = (String) jsonObj.get("tradeDate");
+        String style = (String) jsonObj.get("style").toString().toUpperCase();
 
-        boolean res = Utility.checkBeforeDate(valueDate, tradeDate);
+        boolean res = validStylesList.contains(style);
 
         JSONObject jsonObjValidationMSG = new JSONObject();
-        if (res) {
+
+        if (!res) {
             isValidationSuccessfull = false;
 
-            jsonObjValidationMSG.put("ErrorType", "valueDateNotbeforeTradeDate");
+            jsonObjValidationMSG.put("ErrorType", "StyleNotValid");
             jsonObjValidationMSG.put("TradeNumber", tradeNumber);
 
-            System.out.printf("valueDate:%s is Before tradeDate:%s\n", valueDate, tradeDate);
+            System.out.printf("Style:%s is not Valid\n", style);
         }
 
+//      Adding Validation Message to Validation Store
         if (!isValidationSuccessfull) {
             setMessage(jsonObjValidationMSG.toString());
         }
-        //[Touraj] :: Adding Validation Message to Validation Store
 
         if (!isValidationSuccessfull) {
             validationMessages.put(jsonObjValidationMSG);

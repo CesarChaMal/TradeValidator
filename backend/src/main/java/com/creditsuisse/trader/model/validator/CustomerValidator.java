@@ -1,4 +1,4 @@
-package com.creditsuisse.trader.validator;
+package com.creditsuisse.trader.model.validator;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -9,52 +9,48 @@ import java.util.List;
 /**
  * Created by Cesar Chavez.
  */
-public class StyleValidator implements IValidator {
+public class CustomerValidator implements IValidator {
 
     private String message = null;
     JSONArray validationMessages;
 
-    public StyleValidator(JSONArray validationMessages) {
+    public CustomerValidator(JSONArray validationMessages) {
         this.validationMessages = validationMessages;
     }
 
     @Override
     public boolean processValidation(JSONObject jsonObj, int tradeNumber) throws JSONException {
 
-        List<String> validStylesList = Arrays.asList("AMERICAN", "EUROPEAN");
+        List<String> validCustomersList = Arrays.asList("PLUTO1", "PLUTO2");
 
         boolean isValidationSuccessfull = true;
 
-        if (!jsonObj.get("type").equals("VanillaOption")) {
-//                [Touraj] :: Discard , Because only VanillaOption has style
-            return true;
-        }
+        String customer = (String) jsonObj.get("customer");
 
-        String style = (String) jsonObj.get("style").toString().toUpperCase();
-
-        boolean res = validStylesList.contains(style);
+        boolean res = validCustomersList.contains(customer);
 
         JSONObject jsonObjValidationMSG = new JSONObject();
 
         if (!res) {
             isValidationSuccessfull = false;
 
-            jsonObjValidationMSG.put("ErrorType", "StyleNotValid");
+            jsonObjValidationMSG.put("ErrorType", "CustomerNotValid");
             jsonObjValidationMSG.put("TradeNumber", tradeNumber);
 
-            System.out.printf("Style:%s is not Valid\n", style);
+            System.out.printf("Customer:%s is not valid\n", customer);
         }
 
+      //Adding Validation Message to Validation Store
         if (!isValidationSuccessfull) {
             setMessage(jsonObjValidationMSG.toString());
         }
-        //[Touraj] :: Adding Validation Message to Validation Store
 
         if (!isValidationSuccessfull) {
             validationMessages.put(jsonObjValidationMSG);
         }
 
         return isValidationSuccessfull;
+
     }
 
     @Override
@@ -66,5 +62,6 @@ public class StyleValidator implements IValidator {
     public void setMessage(String message) {
 
         this.message = message;
+
     }
 }

@@ -1,56 +1,58 @@
-package com.creditsuisse.trader.validator;
+package com.creditsuisse.trader.model.validator;
 
+import com.creditsuisse.trader.model.validator.IValidator;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import java.util.Arrays;
-import java.util.List;
+
+import com.creditsuisse.trader.util.Utility;
 
 /**
  * Created by Cesar Chavez.
  */
-public class CustomerValidator implements IValidator {
+public class WeekendValidator implements IValidator {
 
     private String message = null;
     JSONArray validationMessages;
 
-    public CustomerValidator(JSONArray validationMessages) {
+    public WeekendValidator(JSONArray validationMessages) {
         this.validationMessages = validationMessages;
     }
 
     @Override
     public boolean processValidation(JSONObject jsonObj, int tradeNumber) throws JSONException {
 
-        List<String> validCustomersList = Arrays.asList("PLUTO1", "PLUTO2");
-
         boolean isValidationSuccessfull = true;
 
-        String customer = (String) jsonObj.get("customer");
-
-        boolean res = validCustomersList.contains(customer);
-
-        JSONObject jsonObjValidationMSG = new JSONObject();
-
-        if (!res) {
-            isValidationSuccessfull = false;
-
-            jsonObjValidationMSG.put("ErrorType", "CustomerNotValid");
-            jsonObjValidationMSG.put("TradeNumber", tradeNumber);
-
-            System.out.printf("Customer:%s is not valid\n", customer);
+//      Discard , Because only Spot and Forward types have valueDate
+        if (!(jsonObj.get("type").equals("Spot") || jsonObj.get("type").equals("Forward"))) {
+            return true;
         }
 
+        String valueDate = (String) jsonObj.get("valueDate");
+
+        boolean result = Utility.isDateFallinWeekend(valueDate);
+
+        JSONObject jsonObjValidationMSG = new JSONObject();
+        if (result) {
+            isValidationSuccessfull = false;
+
+            jsonObjValidationMSG.put("ErrorType", "valueDateFallinWeekend");
+            jsonObjValidationMSG.put("TradeNumber", tradeNumber);
+
+            System.out.printf("valueDate:%s fall in Weekend\n", valueDate);
+        }
+
+//      Adding Validation Message to Validation Store
         if (!isValidationSuccessfull) {
             setMessage(jsonObjValidationMSG.toString());
         }
-        //[Touraj] :: Adding Validation Message to Validation Store
 
         if (!isValidationSuccessfull) {
             validationMessages.put(jsonObjValidationMSG);
         }
 
         return isValidationSuccessfull;
-
     }
 
     @Override

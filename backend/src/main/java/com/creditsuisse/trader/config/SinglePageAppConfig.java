@@ -19,7 +19,7 @@ import java.util.List;
  * Redirects every page to index.html
  * Used to handle the router
  */
-@Configuration
+//@Configuration
 public class SinglePageAppConfig extends WebMvcConfigurerAdapter {
 
   @Override

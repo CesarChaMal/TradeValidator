@@ -12,11 +12,14 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.savedrequest.NullRequestCache;
 
+/*
 @Configuration
 @Order(SecurityProperties.ACCESS_OVERRIDE_ORDER)
 @EnableGlobalMethodSecurity(securedEnabled = true)
+*/
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
+/*
   @Override
   protected void configure(HttpSecurity http) throws Exception {
     http
@@ -40,4 +43,5 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
       .inMemoryAuthentication()
       .withUser("user").password("password").roles("USER");
   }
+*/
 }

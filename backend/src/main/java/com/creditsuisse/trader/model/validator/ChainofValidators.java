@@ -1,4 +1,4 @@
-package com.creditsuisse.trader.validator;
+package com.creditsuisse.trader.model.validator;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -39,7 +39,6 @@ public class ChainofValidators {
         validatorList.add(sv);
         validatorList.add(esdv);
         validatorList.add(eapdv);
-
     }
 
     public void executeChain()
