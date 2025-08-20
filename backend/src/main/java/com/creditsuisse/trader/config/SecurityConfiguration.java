@@ -25,6 +25,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
       .authorizeRequests()
       .antMatchers("/api/session").permitAll()
       .antMatchers("/api/validatetrades").permitAll()
+      .antMatchers("/api/validatetrades/bulk").permitAll()
+      .antMatchers("/api/generate-test-data").permitAll()
+      .antMatchers("/api/test").permitAll()
       .antMatchers(HttpMethod.GET, "/api/**").authenticated()
       .antMatchers(HttpMethod.POST, "/api/**").hasRole("ADMIN")
       .antMatchers(HttpMethod.PUT, "/api/**").hasRole("ADMIN")
@@ -34,7 +37,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
       .requestCache(new NullRequestCache())
       .and()
       .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.NEVER)
-      .and().csrf().disable();
+      .and().csrf().disable()
+      .cors();
   }
 
   @Bean

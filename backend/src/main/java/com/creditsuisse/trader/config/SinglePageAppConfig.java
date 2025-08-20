@@ -24,6 +24,9 @@ public class SinglePageAppConfig extends WebMvcConfigurerAdapter {
 
   @Override
   public void addResourceHandlers(ResourceHandlerRegistry registry) {
+    registry.addResourceHandler("/static/**")
+      .addResourceLocations("classpath:/static/");
+    
     registry.addResourceHandler("/**")
       .addResourceLocations("classpath:/static/")
       .resourceChain(false)
@@ -76,7 +79,7 @@ public class SinglePageAppConfig extends WebMvcConfigurerAdapter {
     }
 
     private boolean isIgnored(String path) {
-      return ignoredPaths.contains(path);
+      return ignoredPaths.stream().anyMatch(ignored -> path.startsWith(ignored));
     }
 
     private boolean isHandled(String path) {

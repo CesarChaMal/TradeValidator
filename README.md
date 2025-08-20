@@ -12,6 +12,12 @@ A full-stack application for validating financial trade data with a Spring Boot 
 
 ## Features
 
+### Reactive Processing
+- **RxJava Integration**: Handles thousands of trades efficiently using reactive streams
+- **Parallel Processing**: Concurrent validation for improved performance
+- **Bulk Mode**: Automatic reactive processing for datasets > 100 trades
+- **Performance Metrics**: Processing time measurement and reporting
+
 ### Trade Validation Rules
 - **Date Validation**: Value date cannot be before trade date
 - **Weekend Validation**: Trade dates cannot fall on weekends
@@ -22,7 +28,9 @@ A full-stack application for validating financial trade data with a Spring Boot 
 - **Expiry/Premium Date Validation**: Date consistency checks
 
 ### API Endpoints
-- `POST /api/validatetrades` - Validates JSON array of trade data
+- `POST /api/validatetrades` - Validates JSON array of trade data (standard)
+- `POST /api/validatetrades/bulk` - Reactive validation for large datasets
+- `GET /api/generate-test-data?count=N` - Generates test data (up to 5,000 trades)
 
 ## Project Structure
 
@@ -148,10 +156,11 @@ Validation Successful :: No error found in trade data
 ## Technology Stack
 
 ### Backend
-- Spring Boot 1.5.4
+- Spring Boot 2.3.12
 - Spring Security
 - Spring Session
 - Redis
+- RxJava 3.1.5 (Reactive Processing)
 - Swagger UI
 - Spock/Groovy (testing)
 
@@ -169,10 +178,33 @@ Validation Successful :: No error found in trade data
 
 ## Development Notes
 
-- The application uses a chain of responsibility pattern for trade validation
-- Frontend is bundled into the backend JAR for single deployment
-- Swagger UI available for API documentation
-- Session management via Redis in production
+- **Reactive Architecture**: Uses RxJava for processing large trade datasets
+- **Chain of Responsibility**: Trade validation pattern for extensible rules
+- **Parallel Processing**: Concurrent validation using RxJava schedulers
+- **Test Data Generation**: Built-in generator for performance testing
+- **Frontend Bundling**: React app bundled into Spring Boot JAR
+- **Swagger Documentation**: API documentation available
+- **Session Management**: Redis-based sessions in production
+
+## Performance Testing
+
+### Generate Test Data
+```bash
+curl "http://localhost:8080/api/generate-test-data?count=1000" > test-trades.json
+```
+
+### Bulk Validation
+```bash
+curl -X POST -H "Content-Type: application/json" \
+  -d @test-trades.json \
+  http://localhost:8080/api/validatetrades/bulk
+```
+
+### Performance Benchmarks
+- **Small datasets (< 100 trades)**: Standard validation
+- **Large datasets (100+ trades)**: Reactive bulk validation
+- **Concurrent processing**: RxJava parallel streams
+- **Timeout protection**: 30-second timeout for bulk operations
 
 ## Author
 

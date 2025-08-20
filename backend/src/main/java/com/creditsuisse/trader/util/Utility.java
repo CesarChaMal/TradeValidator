@@ -55,12 +55,13 @@ public class Utility {
     }
 
     public static boolean isValidCurrencyISO4217(String currency) {
-
+        if (currency == null || currency.isEmpty()) {
+            return false;
+        }
         try {
             Currency cur = Currency.getInstance(currency);
             cur.getCurrencyCode();
         } catch (IllegalArgumentException e) {
-//            e.printStackTrace();
             return false;
         }
         return true;

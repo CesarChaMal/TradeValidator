@@ -6,7 +6,9 @@ class App extends Component {
     this.state = {
       tradeData: '',
       result: '',
-      loading: false
+      loading: false,
+      bulkMode: false,
+      tradeCount: 0
     };
   }
 
@@ -72,8 +74,16 @@ class App extends Component {
       this.setState({ result: 'Please enter trade data' });
       return;
     }
+    
+    const startTime = Date.now();
     this.setState({ loading: true });
-    fetch('/api/validatetrades', {
+    
+    const endpoint = this.state.bulkMode ? 
+      'http://localhost:8080/api/validatetrades/bulk' : 
+      'http://localhost:8080/api/validatetrades';
+    
+    fetch(endpoint, {
+      mode: 'cors',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -81,12 +91,94 @@ class App extends Component {
       body: this.state.tradeData
     })
     .then(response => response.text())
-    .then(result => this.setState({ result, loading: false }))
+    .then(result => {
+      const duration = Date.now() - startTime;
+      const resultWithTiming = result + '\n\nProcessing time: ' + duration + 'ms';
+      this.setState({ result: resultWithTiming, loading: false });
+    })
     .catch(error => this.setState({ result: 'Error: ' + error.message, loading: false }));
   }
 
   loadSample = (type) => {
-    this.setState({ tradeData: this.sampleTrades[type], result: '' });
+    this.setState({ tradeData: this.sampleTrades[type], result: '', tradeCount: 1 });
+  }
+
+  generateTestData = (count) => {
+    this.setState({ loading: true, result: 'Generating ' + count + ' trades...' });
+    console.log('Generating test data for count:', count);
+    
+    fetch('http://localhost:8080/api/generate-test-data?count=' + count, {
+      mode: 'cors'
+    })
+      .then(response => {
+        console.log('Response status:', response.status);
+        return response.text();
+      })
+      .then(data => {
+        console.log('Data received, length:', data.length);
+        console.log('First 200 chars:', data.substring(0, 200));
+        
+        if (data.includes('<!DOCTYPE html>')) {
+          this.setState({ 
+            result: 'Error: Received HTML instead of JSON. API call was intercepted.',
+            loading: false
+          });
+        } else {
+          this.setState({ 
+            tradeData: data, 
+            result: 'Successfully generated ' + count + ' trades', 
+            loading: false, 
+            bulkMode: count > 100,
+            tradeCount: count
+          });
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        this.setState({ result: 'Error generating data: ' + error.message, loading: false });
+      });
+  }
+
+  downloadJSON = () => {
+    if (!this.state.tradeData) {
+      alert('No trade data to download');
+      return;
+    }
+    try {
+      const blob = new Blob([this.state.tradeData], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'trades-' + this.state.tradeCount + '.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      alert('Error downloading file: ' + error.message);
+    }
+  }
+
+  handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const content = e.target.result;
+        try {
+          const trades = JSON.parse(content);
+          this.setState({ 
+            tradeData: content, 
+            result: '', 
+            tradeCount: Array.isArray(trades) ? trades.length : 1,
+            bulkMode: Array.isArray(trades) && trades.length > 100
+          });
+        } catch (error) {
+          this.setState({ result: 'Invalid JSON file' });
+        }
+      };
+      reader.readAsText(file);
+    }
   }
 
   render() {
@@ -164,6 +256,14 @@ class App extends Component {
         <h1 style={styles.header}>Financial Trade Validator</h1>
         
         <div style={styles.info}>
+          <h3>Features:</h3>
+          <ul>
+            <li><strong>Reactive Processing:</strong> RxJava for handling thousands of trades efficiently</li>
+            <li><strong>Bulk Validation:</strong> Automatic bulk mode for 100+ trades</li>
+            <li><strong>Test Data Generator:</strong> Generate up to 5,000 test trades</li>
+            <li><strong>File Upload:</strong> Upload JSON files for validation</li>
+            <li><strong>Performance Metrics:</strong> Processing time measurement</li>
+          </ul>
           <h3>Validation Rules:</h3>
           <ul>
             <li>Value date cannot be before trade date</li>
@@ -191,7 +291,7 @@ class App extends Component {
                 style={{...styles.button, ...styles.sampleButton}}
                 onClick={() => this.loadSample('invalid')}
               >
-                Invalid Trade (Value Date Error)
+                Invalid Trade
               </button>
               <button 
                 type="button" 
@@ -201,25 +301,127 @@ class App extends Component {
                 Vanilla Option
               </button>
             </div>
+            
+            <div style={styles.buttonGroup}>
+              <strong>Generate Test Data:</strong>
+              <button 
+                type="button" 
+                style={{...styles.button, ...styles.sampleButton}}
+                onClick={() => this.generateTestData(100)}
+                disabled={this.state.loading}
+              >
+                {this.state.loading ? '...' : '100'}
+              </button>
+              <button 
+                type="button" 
+                style={{...styles.button, ...styles.sampleButton}}
+                onClick={() => this.generateTestData(1000)}
+                disabled={this.state.loading}
+              >
+                {this.state.loading ? '...' : '1K'}
+              </button>
+              <button 
+                type="button" 
+                style={{...styles.button, ...styles.sampleButton}}
+                onClick={() => this.generateTestData(5000)}
+                disabled={this.state.loading}
+              >
+                {this.state.loading ? '...' : '5K'}
+              </button>
+              <button 
+                type="button" 
+                style={{...styles.button, ...styles.sampleButton}}
+                onClick={() => this.generateTestData(10000)}
+                disabled={this.state.loading}
+              >
+                {this.state.loading ? '...' : '10K'}
+              </button>
+              <button 
+                type="button" 
+                style={{...styles.button, ...styles.sampleButton}}
+                onClick={() => this.generateTestData(50000)}
+                disabled={this.state.loading}
+              >
+                {this.state.loading ? '...' : '50K'}
+              </button>
+              <button 
+                type="button" 
+                style={{...styles.button, ...styles.sampleButton}}
+                onClick={() => this.generateTestData(100000)}
+                disabled={this.state.loading}
+              >
+                {this.state.loading ? '...' : '100K'}
+              </button>
+              <button 
+                type="button" 
+                style={{...styles.button, ...styles.sampleButton}}
+                onClick={() => this.generateTestData(500000)}
+                disabled={this.state.loading}
+              >
+                {this.state.loading ? '...' : '500K'}
+              </button>
+            </div>
+            
+            <div style={styles.section}>
+              <label style={styles.label}>Upload JSON File:</label>
+              <input 
+                type="file" 
+                accept=".json" 
+                onChange={this.handleFileUpload}
+                style={{...styles.button, backgroundColor: 'white', border: '1px solid #ddd'}}
+              />
+            </div>
           </div>
 
           <div style={styles.section}>
-            <label style={styles.label}>Trade Data (JSON Array):</label>
+            <label style={styles.label}>
+              Trade Data (JSON Array) 
+              {this.state.tradeCount > 0 && (
+                <span style={{color: '#666', fontWeight: 'normal'}}>
+                  - {this.state.tradeCount} trades loaded
+                  {this.state.bulkMode && <span style={{color: '#007bff'}}> (Bulk Mode)</span>}
+                </span>
+              )}
+            </label>
             <textarea
               style={styles.textarea}
               value={this.state.tradeData}
-              onChange={(e) => this.setState({ tradeData: e.target.value })}
-              placeholder="Enter JSON array of trades or use sample data above"
+              onChange={(e) => {
+                const value = e.target.value;
+                try {
+                  const trades = JSON.parse(value || '[]');
+                  this.setState({ 
+                    tradeData: value, 
+                    tradeCount: Array.isArray(trades) ? trades.length : 0,
+                    bulkMode: Array.isArray(trades) && trades.length > 100
+                  });
+                } catch (error) {
+                  this.setState({ tradeData: value });
+                }
+              }}
+              placeholder="Enter JSON array of trades, upload a file, or generate test data"
             />
           </div>
 
-          <button 
-            type="submit" 
-            style={{...styles.button, ...styles.primaryButton}}
-            disabled={this.state.loading}
-          >
-            {this.state.loading ? 'Validating...' : 'Validate Trades'}
-          </button>
+          <div style={styles.buttonGroup}>
+            <button 
+              type="submit" 
+              style={{...styles.button, ...styles.primaryButton}}
+              disabled={this.state.loading}
+            >
+              {this.state.loading ? 'Validating...' : 
+               (this.state.bulkMode ? 'Validate Trades (Reactive)' : 'Validate Trades')}
+            </button>
+            {this.state.tradeData && (
+              <button 
+                type="button" 
+                style={{...styles.button, backgroundColor: '#28a745', color: 'white'}}
+                onClick={this.downloadJSON}
+              >
+                Download JSON
+              </button>
+            )}
+          </div>
         </form>
 
         {this.state.result && (

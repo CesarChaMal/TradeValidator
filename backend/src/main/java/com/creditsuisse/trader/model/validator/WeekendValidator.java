@@ -24,32 +24,36 @@ public class WeekendValidator implements IValidator {
 
         boolean isValidationSuccessfull = true;
 
-//      Discard , Because only Spot and Forward types have valueDate
-        if (!(jsonObj.get("type").equals("Spot") || jsonObj.get("type").equals("Forward"))) {
-            return true;
-        }
-
-        String valueDate = (String) jsonObj.get("valueDate");
-
-        boolean result = Utility.isDateFallinWeekend(valueDate);
-
-        JSONObject jsonObjValidationMSG = new JSONObject();
-        if (result) {
+        // Check tradeDate for weekends (applies to all trade types)
+        String tradeDate = (String) jsonObj.get("tradeDate");
+        boolean tradeDateWeekend = Utility.isDateFallinWeekend(tradeDate);
+        
+        if (tradeDateWeekend) {
             isValidationSuccessfull = false;
-
-            jsonObjValidationMSG.put("ErrorType", "valueDateFallinWeekend");
+            JSONObject jsonObjValidationMSG = new JSONObject();
+            jsonObjValidationMSG.put("ErrorType", "tradeDateFallinWeekend");
             jsonObjValidationMSG.put("TradeNumber", tradeNumber);
-
-            System.out.printf("valueDate:%s fall in Weekend\n", valueDate);
-        }
-
-//      Adding Validation Message to Validation Store
-        if (!isValidationSuccessfull) {
-            setMessage(jsonObjValidationMSG.toString());
-        }
-
-        if (!isValidationSuccessfull) {
+            System.out.printf("tradeDate:%s fall in Weekend\n", tradeDate);
             validationMessages.put(jsonObjValidationMSG);
+        }
+
+        // Check valueDate for weekends (only for Spot and Forward types)
+        if (jsonObj.get("type").equals("Spot") || jsonObj.get("type").equals("Forward")) {
+            String valueDate = (String) jsonObj.get("valueDate");
+            boolean valueDateWeekend = Utility.isDateFallinWeekend(valueDate);
+            
+            if (valueDateWeekend) {
+                isValidationSuccessfull = false;
+                JSONObject jsonObjValidationMSG = new JSONObject();
+                jsonObjValidationMSG.put("ErrorType", "valueDateFallinWeekend");
+                jsonObjValidationMSG.put("TradeNumber", tradeNumber);
+                System.out.printf("valueDate:%s fall in Weekend\n", valueDate);
+                validationMessages.put(jsonObjValidationMSG);
+            }
+        }
+
+        if (!isValidationSuccessfull) {
+            setMessage("Weekend validation failed");
         }
 
         return isValidationSuccessfull;
