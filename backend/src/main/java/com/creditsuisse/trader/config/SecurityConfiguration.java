@@ -24,6 +24,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     http
       .authorizeRequests()
       .antMatchers("/api/session").permitAll()
+      .antMatchers("/api/validatetrades").permitAll()
       .antMatchers(HttpMethod.GET, "/api/**").authenticated()
       .antMatchers(HttpMethod.POST, "/api/**").hasRole("ADMIN")
       .antMatchers(HttpMethod.PUT, "/api/**").hasRole("ADMIN")
@@ -46,6 +47,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
   public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
     auth
       .inMemoryAuthentication()
-      .withUser("user").password("{noop}password").roles("USER");
+      .withUser("user").password("{noop}password").roles("USER")
+      .and()
+      .withUser("admin").password("{noop}admin").roles("ADMIN");
   }
 }
