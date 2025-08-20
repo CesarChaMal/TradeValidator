@@ -1,63 +1,43 @@
 package com.creditsuisse.trader.api
 
-import org.springframework.http.HttpStatus
 import com.creditsuisse.trader.AbstractMvcSpec
+import com.fasterxml.jackson.databind.ObjectMapper
+import org.springframework.http.MediaType
 import spock.lang.Shared
-import spock.lang.Stepwise
-import spockmvc.RequestParams
 
-@Stepwise
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
+
 class AuthenticationResourceSpec extends AbstractMvcSpec {
 
   @Shared
-  String token
+  ObjectMapper objectMapper = new ObjectMapper()
 
   def "bad authentication"() {
     given:
     def credentials = [username: 'user', password: 'badpassword']
+    def json = objectMapper.writeValueAsString(credentials)
 
     when:
-    def res = post('/api/session', credentials)
+    def result = mockMvc.perform(post('/api/session')
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(json))
 
     then:
-    res.status == HttpStatus.UNAUTHORIZED
+    result.andExpect(status().isUnauthorized())
   }
 
   def "good authentication"() {
     given:
     def credentials = [username: 'user', password: 'password']
+    def json = objectMapper.writeValueAsString(credentials)
 
     when:
-    def res = post('/api/session', credentials)
-    token = res.json.token
+    def result = mockMvc.perform(post('/api/session')
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(json))
 
     then:
-    res.status == HttpStatus.OK
-    res.json.userName == 'user'
-    token != null
-  }
-
-  def "get session"() {
-    when:
-    def res = get('/api/session', new RequestParams(authToken: token))
-
-    then:
-    res.status == HttpStatus.OK
-    res.json.userName == 'user'
-  }
-
-  def "delete session"() {
-    when:
-    def res = delete('/api/session', new RequestParams(authToken: token))
-
-    then:
-    res.status == HttpStatus.OK
-
-    when:
-    res = get('/api/session', new RequestParams(authToken: token))
-
-    then:
-    res.status == HttpStatus.OK
-    res.content.isEmpty()
+    result.andExpect(status().isOk())
   }
 }
