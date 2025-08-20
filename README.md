@@ -52,6 +52,19 @@ TradeValidator/
 
 ## Quick Start
 
+### Production Mode (Default)
+
+1. **Build and run** (requires Redis):
+   ```bash
+   gradlew build
+   gradlew bootRun
+   ```
+
+2. **Run with Docker Compose**:
+   ```bash
+   docker-compose up -d
+   ```
+
 ### Development Mode
 
 1. **Install dependencies**:
@@ -59,31 +72,14 @@ TradeValidator/
    gradlew frontend:yarn_install
    ```
 
-2. **Start frontend** (development server):
+2. **Start backend** (development profile):
+   ```bash
+   gradlew bootRun -Dspring.profiles.active=development
+   ```
+
+3. **Start frontend** (separate development server):
    ```bash
    gradlew frontend:start
-   ```
-
-3. **Start backend**:
-   ```bash
-   gradlew bootRun
-   ```
-
-### Production Build
-
-1. **Build application**:
-   ```bash
-   gradlew build
-   ```
-
-2. **Create Docker image**:
-   ```bash
-   gradlew backend:buildDocker
-   ```
-
-3. **Run with Docker Compose**:
-   ```bash
-   docker-compose up -d
    ```
 
 ## API Usage
@@ -141,8 +137,8 @@ Validation Successful :: No error found in trade data
 ## Configuration
 
 ### Application Properties
-- Development: Embedded session configuration
-- Production: External Redis configuration in `application.yml`
+- **Production (Default)**: Redis session store, requires Redis server
+- **Development Profile**: No session store, embedded configuration with live reload
 
 ### Docker Configuration
 - Application runs on port 8080

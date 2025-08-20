@@ -12,6 +12,7 @@ import org.zeroturnaround.exec.stream.slf4j.Slf4jStream;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -35,11 +36,16 @@ public class YarnRunner implements CommandLineRunner {
   @Override
   public void run(String... args) throws Exception {
     if (!environment.acceptsProfiles("production") && !environment.acceptsProfiles("test")) {
-      // AtomicBoolean registered = (AtomicBoolean) Restarter.getInstance().getOrAddAttribute("yarnStarted", AtomicBoolean::new);
-      AtomicBoolean registered = new AtomicBoolean(false);
-      boolean alreadyRun = registered.getAndSet(true);
-      if (!alreadyRun) {
-        startFrontend();
+      // Check if frontend is already running on port 3000
+      if (!isPortInUse(3000)) {
+        // AtomicBoolean registered = (AtomicBoolean) Restarter.getInstance().getOrAddAttribute("yarnStarted", AtomicBoolean::new);
+        AtomicBoolean registered = new AtomicBoolean(false);
+        boolean alreadyRun = registered.getAndSet(true);
+        if (!alreadyRun) {
+          startFrontend();
+        }
+      } else {
+        log.info("Frontend appears to be running on port 3000, skipping auto-start");
       }
     }
   }
@@ -101,6 +107,14 @@ public class YarnRunner implements CommandLineRunner {
 
   private boolean isWindows() {
     return System.getProperty("os.name").toLowerCase().contains("win");
+  }
+
+  private boolean isPortInUse(int port) {
+    try (Socket socket = new Socket("localhost", port)) {
+      return true;
+    } catch (IOException e) {
+      return false;
+    }
   }
 
 }
