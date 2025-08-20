@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.devtools.restart.Restarter;
+// import org.springframework.boot.devtools.restart.Restarter;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import org.zeroturnaround.exec.ProcessExecutor;
@@ -35,7 +35,8 @@ public class YarnRunner implements CommandLineRunner {
   @Override
   public void run(String... args) throws Exception {
     if (!environment.acceptsProfiles("production") && !environment.acceptsProfiles("test")) {
-      AtomicBoolean registered = (AtomicBoolean) Restarter.getInstance().getOrAddAttribute("yarnStarted", AtomicBoolean::new);
+      // AtomicBoolean registered = (AtomicBoolean) Restarter.getInstance().getOrAddAttribute("yarnStarted", AtomicBoolean::new);
+      AtomicBoolean registered = new AtomicBoolean(false);
       boolean alreadyRun = registered.getAndSet(true);
       if (!alreadyRun) {
         startFrontend();
